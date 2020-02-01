@@ -40,8 +40,7 @@
         padding:5
         spacing:5
         GridLayout:
-            rows: 2
-            spacing:5
+            rows: 1
             GridLayout:
                 rows: 2
                 CustTopButton:
@@ -65,14 +64,8 @@
                         font_size: 40
                         size_hint: 0.5,1
                         disabled: True
-                        on_press: sorter.OkButton(OKButton,texter,loadButton,gendPref)
+                        on_press: sorter.OkButton(OKButton,texter,sortAll)
 
-            CustTopButton:
-                id: loadButton
-                text: '[b]  Load[/b] \n [size=35]no file loaded[/size]'
-                bold: False
-                on_press: sorter.loadDB(loadButton,createButton,gendPref,hobby,sports,eventPref,music,subS,subW)
-        
         BoxLayout:
             orientation: "vertical"
             spacing:5
@@ -97,45 +90,10 @@
     
     GridLayout:
         padding: 10
-        rows:2
-        spacing: 20
+        rows:1
+
+        CustBotButton:
+            id: sortAll
+            text: 'Sort all'
+            on_press: sorter.allSort(self, generateButton)
         
-        BoxLayout:
-            spacing: 20
-
-            CustBotButton:
-                id: gendPref
-                text: 'Gender Pref.\n[size=30]        Stage 1[/size] \n[size=37]       Sort[/size]'
-                on_press: sorter.gendPrefSort(gendPref,hobby,sports,eventPref,music,subS,subW)
-            CustBotButton:
-                id: hobby
-                text: ' Hobbies\n[size=30]    Stage 2[/size] \n[size=37]    Sort[/size]'
-                on_press: sorter.hobbiesSort(self)
-
-            CustBotButton:
-                id:sports
-                text: ' Sports\n[size=30]    Stage 3[/size] \n[size=37]    Sort[/size]'
-                on_press: sorter.sportsSort(self)
-
-            CustBotButton:
-                id: eventPref
-                text: 'Event Pref.\n[size=30]       Stage 4[/size] \n[size=37]      Sort[/size]'
-                on_press: sorter.eventPrefSort(self)
-        
-        BoxLayout:
-            spacing: 20
-            
-            CustBotButton:
-                id: music
-                text: ' Music\n[size=30]  Stage 5[/size] \n[size=37]  Sort[/size]'
-                on_press: sorter.musicSort(self)
-
-            CustBotButton:
-                id: subS
-                text: ' Subject Str.\n[size=30]          Stage 6[/size] \n[size=37]        Sort[/size]'
-                on_press: sorter.subjStrSort(self)
-                
-            CustBotButton:
-                id: subW
-                text: ' Subject Weak.\n[size=30]           Stage 7[/size] \n[size=37]         Sort[/size]'
-                on_press: sorter.subjWeakSort(self,generateButton)

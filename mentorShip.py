@@ -10,6 +10,8 @@ from kivy.core.text import LabelBase
 import sqlite3
 from kivy.uix.textinput import TextInput
 import tkinter
+root = tkinter.Tk()
+root.withdraw()
 from tkinter.filedialog import askopenfilename
 import csv
 
@@ -52,13 +54,12 @@ class containerLayout(GridLayout):
             "INSERT INTO mentee (time,fname,lname,email,session,school,gend,gendpref,music,hobby,sport,eventpref,subS,subW,sp)\
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", to_db)
         
-    def OkButton(self, widget1,widget2,widget3,widget4):
+    def OkButton(self, widget1,widget2,widget3):
         #takes the the CSV filepaths and throws it to makeBaseTables
         self.text=widget2.text+'.db'
-        widget3.text='[b]  Loaded[/b]'
-        for i in [widget1,widget2,widget3]:
+        for i in [widget1,widget2]:
             i.disabled=True
-        widget4.disabled=False
+        widget3.disabled=False
         conn=sqlite3.connect(self.text)
         c = conn.cursor()
         root = tkinter.Tk()
@@ -78,12 +79,10 @@ class containerLayout(GridLayout):
         for i in [widget2,widget3]:
             i.disabled=False
 
-    def creatinTablesForTheButtons(self,stringa,weighting):
+    def creatinTablesForTheButtons(self,c,stringa,weighting):
         #weighting adds a different number to countMatched depending on sorting aspect 
         # https://stackoverflow.com/questions/973541/how-to-set-sqlite3-to-be-case-insensitive-when-string-comparing
         # http://www.sqlitetutorial.net/sqlite-left-join/ 
-        conn=sqlite3.connect(self.text)
-        c = conn.cursor()
         c.execute("CREATE VIEW vw_%s1b AS SELECT mentor_id,b.genderpref_id,b.%s1, CASE WHEN b.%s1 ='' THEN 0 WHEN b.%s1 = 'Other' THEN 0 WHEN b.%s1 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.%s1 = a.%s1 COLLATE NOCASE OR b.%s1 = a.%s2 COLLATE NOCASE OR b.%s1 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s2b AS SELECT mentor_id,b.genderpref_id,b.%s2, CASE WHEN b.%s2 ='' THEN 0 WHEN b.%s2 = 'Other' THEN 0 WHEN b.%s2 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.%s2 = a.%s1 COLLATE NOCASE OR b.%s2 = a.%s2 COLLATE NOCASE OR b.%s2 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s3b AS SELECT mentor_id,b.genderpref_id,b.%s3, CASE WHEN b.%s3 ='' THEN 0 WHEN b.%s3 = 'Other' THEN 0 WHEN b.%s3 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.%s3 = a.%s1 COLLATE NOCASE OR b.%s3 = a.%s2 COLLATE NOCASE OR b.%s3 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
@@ -95,29 +94,6 @@ class containerLayout(GridLayout):
         c.execute("CREATE VIEW vw_%s1n AS SELECT mentor_id,b.genderpref_id,b.%s1, CASE WHEN b.%s1 ='' THEN 0 WHEN b.%s1 = 'Other' THEN 0 WHEN b.%s1 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s1 = a.%s1 COLLATE NOCASE OR b.%s1 = a.%s2 COLLATE NOCASE OR b.%s1 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s2n AS SELECT mentor_id,b.genderpref_id,b.%s2, CASE WHEN b.%s2 ='' THEN 0 WHEN b.%s2 = 'Other' THEN 0 WHEN b.%s2 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s2 = a.%s1 COLLATE NOCASE OR b.%s2 = a.%s2 COLLATE NOCASE OR b.%s2 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s3n AS SELECT mentor_id,b.genderpref_id,b.%s3, CASE WHEN b.%s3 ='' THEN 0 WHEN b.%s3 = 'Other' THEN 0 WHEN b.%s3 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s3 = a.%s1 COLLATE NOCASE OR b.%s3 = a.%s2 COLLATE NOCASE OR b.%s3 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
-        conn.commit()
-        conn.close()
-
-    def loadDB(self,widget,widget1,a,b,c,d,e,f,g):
-        root = tkinter.Tk()
-        root.withdraw()
-        self.text = askopenfilename(title="Choose a DB file",filetypes = [("Database files", "*.db")])
-        if self.text:
-            widget.text='[b] Loaded[/b]'
-            widget.disabled=True
-            widget1.disabled=True
-            for i in [a,b,c,d,e,f,g]:
-                i.disabled=False
-            conn=sqlite3.connect(self.text)
-            cur = conn.cursor()
-            tableList=['gendpref_boy','vw_hobby1n','vw_sport1n','vw_eventpref1n','vw_music1n','vw_subS1n','vw_subWn']
-            widgetList=[a,b,c,d,e,f,g]
-            for i in widgetList:
-                cur.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='view' AND name='%s'"%tableList[widgetList.index(i)])
-                if cur.fetchall()[0][0]==1:
-                    i.disabled=True
-            conn.commit()
-            conn.close()
 
     def generateReport(self,widget):
         # https://www.w3resource.com/sqlite/sqlite-select-query-statement.php
@@ -247,8 +223,11 @@ class containerLayout(GridLayout):
 
     def exit(self):
         quit()
+        
+    def allSort(self, widget, generateWidget):
+        print("ok hello like please are you running")
+        """sorts by gender preference"""
 
-    def gendPrefSort(self,widget1,widget2,widget3,widget4,widget5,widget6,widget7):
         # https://stackoverflow.com/questions/52767758/create-new-sqlite-table-combining-column-from-other-tables-with-sqlite3-and-pyth
         # https://www.w3schools.com/sql/func_mysql_substr.asp
         conn=sqlite3.connect(self.text)
@@ -277,36 +256,24 @@ class containerLayout(GridLayout):
         c.execute("CREATE VIEW gendpref_n AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
         c.execute("CREATE VIEW mentor_n AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
 
-        conn.commit()
-        conn.close()
-        widget1.text= 'Gender Pref.'+ '\nComplete'
-        widget1.disabled= True
-        for i in [widget2,widget3,widget4,widget5,widget6,widget7]:
-            i.disabled=False
-    
-    def hobbiesSort(self, widget):
-        self.creatinTablesForTheButtons("hobby",11)
-        widget.text= 'Hobbies'+ '\nComplete'
-        widget.disabled= True
+        #sorts by hobbies
 
-    def sportsSort(self, widget):
-        self.creatinTablesForTheButtons("sport",9)
-        widget.text= 'Sports'+ '\nComplete'
-        widget.disabled= True
+        self.creatinTablesForTheButtons(c,"hobby",11)
 
-    def eventPrefSort(self, widget):
-        self.creatinTablesForTheButtons("eventpref",3)
-        widget.text= 'Event Pref.'+ '\nComplete'
-        widget.disabled= True
-        
-    def musicSort(self, widget):
-        self.creatinTablesForTheButtons("music",7)
-        widget.text= 'Music'+ '\nComplete'
-        widget.disabled= True
+        #sorts by sports
 
-    def subjStrSort(self, widget):
-        conn=sqlite3.connect(self.text)
-        c = conn.cursor()
+        self.creatinTablesForTheButtons(c,"sport",9)
+
+        #sorts by event preference
+
+        self.creatinTablesForTheButtons(c,"eventpref",3)
+
+        #sorts by music pref
+
+        self.creatinTablesForTheButtons(c,"music",7)
+
+        #sorts by subject strength
+
         c.execute("CREATE VIEW vw_subS1b AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
         c.execute("CREATE VIEW vw_subS2b AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
         
@@ -315,23 +282,17 @@ class containerLayout(GridLayout):
 
         c.execute("CREATE VIEW vw_subS1n AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
         c.execute("CREATE VIEW vw_subS2n AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
-        conn.commit()
-        conn.close()
+        
+        #sorts by subject weakness
 
-        widget.text= 'Subject Str.'+ '\nComplete'
-        widget.disabled= True
- 
-    def subjWeakSort(self, widget,widget1):
-        conn=sqlite3.connect(self.text)
-        c = conn.cursor()
         c.execute("CREATE VIEW vw_subWb AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subW = a.subW")
         c.execute("CREATE VIEW vw_subWg AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subW = a.subW")
         c.execute("CREATE VIEW vw_subWn AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subW = a.subW")
         conn.commit()
         conn.close()
-        widget.text= 'Subject Weak.'+ '\nComplete'
-        widget.disabled= True
-        widget1.disabled=False
+        widget.disabled=True
+        generateWidget.disabled=False
+
 
 class mentorshipApp(App):
     def build(self):
