@@ -43,28 +43,10 @@
             
             
             CustTopButton:
-                id: createButton
-                text: 'Create'
-                on_press: sorter.create(createButton,texter,OKButton)
+                id: loadButton
+                text: 'Load'
+                on_press: sorter.create(loadButton, sortAll)
                 padding_bottom:20
-
-            BoxLayout:
-                orientation:"horizontal"
-                TextInput:
-                    id: texter
-                    text: ''
-                    font_size: 20
-                    focus: True
-                    hint_text: 'Name of new\ndatabase'
-                    disabled: True
-                    multiline: False
-                CustTopButton:
-                    id: OKButton
-                    text:'OK'
-                    font_size: 40
-                    size_hint: 0.5,1
-                    disabled: True
-                    on_press: sorter.OkButton(OKButton,texter,sortAll)
 
         FloatLayout:      
             Label:

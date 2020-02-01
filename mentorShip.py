@@ -1,4 +1,5 @@
 import kivy 
+import os
 from kivy.config import Config
 #  0 being off 1 being on as in true/false
 Config.set('graphics', 'resizable', '0')
@@ -54,12 +55,16 @@ class containerLayout(GridLayout):
             "INSERT INTO mentee (time,fname,lname,email,session,school,gend,gendpref,music,hobby,sport,eventpref,subS,subW,sp)\
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", to_db)
         
-    def OkButton(self, widget1,widget2,widget3):
+    def create(self, loadButton, widget):
+
+        # Delete it at the start cause it won't delete at the end for some reason
+        if os.path.isfile('temp.db'):
+            os.remove('temp.db')
+
         #takes the the CSV filepaths and throws it to makeBaseTables
-        self.text=widget2.text+'.db'
-        for i in [widget1,widget2]:
-            i.disabled=True
-        widget3.disabled=False
+        self.text='temp.db'
+        widget.disabled=False
+        loadButton.disabled
         conn=sqlite3.connect(self.text)
         c = conn.cursor()
         root = tkinter.Tk()
@@ -72,12 +77,6 @@ class containerLayout(GridLayout):
 
         conn.commit()
         conn.close()
-
-    def create(self,widget1,widget2,widget3):
-        #opens up the text input and Ok button
-        widget1.disabled=True
-        for i in [widget2,widget3]:
-            i.disabled=False
 
     def creatinTablesForTheButtons(self,c,stringa,weighting):
         #weighting adds a different number to countMatched depending on sorting aspect 
