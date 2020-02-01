@@ -3,7 +3,7 @@
 # https://kivy.org/doc/stable/api-kivy.uix.textinput.html
 <CustBotButton@Button>:
     font_name: "Ostrich"
-    font_size: 45
+    font_size: 40
     color: 0,0,0,1
     markup: True
     background_normal: 'on-down-pink.png'
@@ -15,8 +15,7 @@
 <CustTopButton@Button>:
     markup: True
     font_name: "Ostrich"
-    bold: True
-    font_size: 50
+    font_size: 40
     color: 0,0,0,1
     background_normal: 'normal-yellow.png'
     background_down: 'orange.jpg'
@@ -33,67 +32,60 @@
     id: sorter
     rows: 2
     text: ''
+    padding:30
 
     GridLayout:
-        cols:3
+        cols:2
         size_hint: 1,.7  
-        padding:5
         spacing:5
         GridLayout:
-            rows: 1
-            GridLayout:
-                rows: 2
+            rows: 2
+            
+            
+            CustTopButton:
+                id: createButton
+                text: 'Create'
+                on_press: sorter.create(createButton,texter,OKButton)
+                padding_bottom:20
+
+            BoxLayout:
+                orientation:"horizontal"
+                TextInput:
+                    id: texter
+                    text: ''
+                    font_size: 20
+                    focus: True
+                    hint_text: 'Name of new\ndatabase'
+                    disabled: True
+                    multiline: False
                 CustTopButton:
-                    id: createButton
-                    text: 'Create'
-                    on_press: sorter.create(createButton,texter,OKButton)
+                    id: OKButton
+                    text:'OK'
+                    font_size: 40
+                    size_hint: 0.5,1
+                    disabled: True
+                    on_press: sorter.OkButton(OKButton,texter,sortAll)
 
-                BoxLayout:
-                    orientation:"horizontal"
-                    TextInput:
-                        id: texter
-                        text: ''
-                        font_size: 20
-                        focus: True
-                        hint_text: 'Name of new\ndatabase'
-                        disabled: True
-                        multiline: False
-                    CustTopButton:
-                        id: OKButton
-                        text:'OK'
-                        font_size: 40
-                        size_hint: 0.5,1
-                        disabled: True
-                        on_press: sorter.OkButton(OKButton,texter,sortAll)
-
-        BoxLayout:
-            orientation: "vertical"
-            spacing:5
-            CustTopButton:
-                id: generateButton
-                disabled: True
-                text: 'Generate \n Pairings'
-                on_press: sorter.generateReport(self)
-            CustTopButton:
-                
-                text: 'Exit'
-                on_press: sorter.exit()
-        
         FloatLayout:      
             Label:
                 text: 'Mentorship \n     Pairing'
                 pos_hint: {'center_x': 0.55 ,'center_y':.7}
                 color: 1,1,1,1
-                font_size:60
+                font_size:50
                 bold: True
                 font_name: "Ostrich"
     
-    GridLayout:
-        padding: 10
-        rows:1
+    BoxLayout:
+        orientation: "horizontal"
+        spacing:30
 
         CustBotButton:
             id: sortAll
-            text: 'Sort all'
-            on_press: sorter.allSort(self, generateButton)
+            text: 'Generate\n Pairings'
+            on_press: sorter.allSort(self)
+        
+        CustTopButton:
+            text: 'Exit'
+            on_press: sorter.exit()
+
         

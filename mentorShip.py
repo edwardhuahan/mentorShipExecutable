@@ -2,8 +2,8 @@ import kivy
 from kivy.config import Config
 #  0 being off 1 being on as in true/false
 Config.set('graphics', 'resizable', '0')
-Config.set('graphics', 'width', '800')
-Config.set('graphics', 'height', '600')
+Config.set('graphics', 'width', '600')
+Config.set('graphics', 'height', '400')
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.text import LabelBase
@@ -95,10 +95,78 @@ class containerLayout(GridLayout):
         c.execute("CREATE VIEW vw_%s2n AS SELECT mentor_id,b.genderpref_id,b.%s2, CASE WHEN b.%s2 ='' THEN 0 WHEN b.%s2 = 'Other' THEN 0 WHEN b.%s2 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s2 = a.%s1 COLLATE NOCASE OR b.%s2 = a.%s2 COLLATE NOCASE OR b.%s2 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s3n AS SELECT mentor_id,b.genderpref_id,b.%s3, CASE WHEN b.%s3 ='' THEN 0 WHEN b.%s3 = 'Other' THEN 0 WHEN b.%s3 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s3 = a.%s1 COLLATE NOCASE OR b.%s3 = a.%s2 COLLATE NOCASE OR b.%s3 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
 
-    def generateReport(self,widget):
-        # https://www.w3resource.com/sqlite/sqlite-select-query-statement.php
+
+    def exit(self):
+        quit()
+        
+    def allSort(self,generateWidget):
+        """sorts by gender preference"""
+
+        # https://stackoverflow.com/questions/52767758/create-new-sqlite-table-combining-column-from-other-tables-with-sqlite3-and-pyth
+        # https://www.w3schools.com/sql/func_mysql_substr.asp
         conn=sqlite3.connect(self.text)
         c = conn.cursor()
+        c.execute("CREATE TABLE gend_pref_boy_info (mentor_id INTEGER, genderpref_id TEXT);")
+        c.execute("INSERT INTO gend_pref_boy_info(mentor_id) SELECT mentor.id FROM mentor WHERE mentor.gend='Male'")
+        c.execute("INSERT INTO gend_pref_boy_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='Male'")
+
+        c.execute("CREATE TABLE gend_pref_girl_info (mentor_id INTEGER, genderpref_id TEXT);")
+        c.execute("INSERT INTO gend_pref_girl_info(mentor_id) SELECT mentor.id FROM mentor WHERE mentor.gend='Female'")
+        c.execute("INSERT INTO gend_pref_girl_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='Female'")
+
+        c.execute("CREATE TABLE gend_pref_n_info (mentor_id INTEGER, genderpref_id TEXT);")
+        c.execute("INSERT INTO gend_pref_n_info(mentor_id) SELECT mentor.id FROM mentor")
+        c.execute("INSERT INTO gend_pref_n_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='No Preference'") 
+
+        c.execute("CREATE VIEW vw_mentor_all AS SELECT id,fname,lname,gend,subW,hobby1,TRIM(SUBSTR(hobby2,pos1 + 1)) AS hobby2,TRIM(SUBSTR(hobby2,1,pos1 - 1)) AS hobby3,sport1,TRIM(SUBSTR(sport2,pos+1)) AS sport2,TRIM(SUBSTR(sport2,1,pos-1)) AS sport3,music1,TRIM(SUBSTR(music2,pos2+1)) AS music2,TRIM(SUBSTR(music2,1,pos2-1)) AS music3 ,eventpref1,TRIM(SUBSTR(eventpref2,pos3+1)) AS eventpref2,TRIM(SUBSTR(eventpref2,1,pos3-1)) AS eventpref3,subS1,TRIM(SUBSTR(subS2,pos4+1)) AS subS2 FROM (SELECT id,fname,lname,gend,subW,hobby1, hobby2, INSTR(hobby2, ', ') AS pos1, sport1, sport2, INSTR(sport2, ', ') AS pos, music1, music2, INSTR(music2, ', ') AS pos2, eventpref1, eventpref2, INSTR(eventpref2, ', ') AS pos3, subS1, subS2, INSTR(subS2, ', ') AS pos4 FROM (SELECT id,fname,lname,gend,subW,SUBSTR(hobby,1,pos1 - 1) AS hobby1, SUBSTR(hobby, pos1 + 1) AS hobby2,SUBSTR(sport,1,pos - 1) AS sport1, SUBSTR(sport,pos + 1) AS sport2, SUBSTR(music,1,pos2 - 1) AS music1, SUBSTR(music,pos2 + 1) AS music2, SUBSTR(eventpref,1,pos3 -1) AS eventpref1, SUBSTR(eventpref,pos3 + 1) AS eventpref2, SUBSTR(subS,1, pos4 - 1) AS subS1, SUBSTR(subS, pos4 + 1) AS subS2 FROM (SELECT *, id, fname,lname,gend,subW, INSTR(hobby, ', ') AS pos1, INSTR(sport, ', ') AS pos, INSTR(music, ', ') AS pos2, INSTR(eventpref, ', ') AS pos3, INSTR(subS, ', ') AS pos4 FROM mentor)))")
+        c.execute("CREATE VIEW vw_mentee_all AS SELECT id,fname,lname,subW,hobby1,TRIM(SUBSTR(hobby2,pos1 + 1)) AS hobby2,TRIM(SUBSTR(hobby2,1,pos1 - 1)) AS hobby3,sport1,TRIM(SUBSTR(sport2,pos+1)) AS sport2,TRIM(SUBSTR(sport2,1,pos-1)) AS sport3,music1,TRIM(SUBSTR(music2,pos2+1)) AS music2,TRIM(SUBSTR(music2,1,pos2-1)) AS music3 ,eventpref1,TRIM(SUBSTR(eventpref2,pos3+1)) AS eventpref2,TRIM(SUBSTR(eventpref2,1,pos3-1)) AS eventpref3,subS1,TRIM(SUBSTR(subS2,pos4+1)) AS subS2 FROM (SELECT id,fname,lname,subW,hobby1, hobby2, INSTR(hobby2, ', ') AS pos1, sport1, sport2, INSTR(sport2, ', ') AS pos, music1, music2, INSTR(music2, ', ') AS pos2, eventpref1, eventpref2, INSTR(eventpref2, ', ') AS pos3, subS1, subS2, INSTR(subS2, ', ') AS pos4 FROM (SELECT id,fname,lname,subW,SUBSTR(hobby,1,pos1 - 1) AS hobby1, SUBSTR(hobby, pos1 + 1) AS hobby2,SUBSTR(sport,1,pos - 1) AS sport1, SUBSTR(sport,pos + 1) AS sport2, SUBSTR(music,1,pos2 - 1) AS music1, SUBSTR(music,pos2 + 1) AS music2, SUBSTR(eventpref,1,pos3 -1) AS eventpref1, SUBSTR(eventpref,pos3 + 1) AS eventpref2, SUBSTR(subS,1, pos4 - 1) AS subS1, SUBSTR(subS, pos4 + 1) AS subS2 FROM (SELECT *, id, fname,lname,subW, INSTR(hobby, ', ') AS pos1, INSTR(sport, ', ') AS pos, INSTR(music, ', ') AS pos2, INSTR(eventpref, ', ') AS pos3, INSTR(subS, ', ') AS pos4 FROM mentee)))")
+
+        c.execute("CREATE VIEW gendpref_boy AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_boy_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
+        c.execute("CREATE VIEW mentor_boy AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_boy_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
+        
+        c.execute("CREATE VIEW gendpref_girl AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_girl_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
+        c.execute("CREATE VIEW mentor_girl AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_girl_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
+        
+        c.execute("CREATE VIEW gendpref_n AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
+        c.execute("CREATE VIEW mentor_n AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
+
+        #sorts by hobbies
+
+        self.creatinTablesForTheButtons(c,"hobby",11)
+
+        #sorts by sports
+
+        self.creatinTablesForTheButtons(c,"sport",9)
+
+        #sorts by event preference
+
+        self.creatinTablesForTheButtons(c,"eventpref",3)
+
+        #sorts by music pref
+
+        self.creatinTablesForTheButtons(c,"music",7)
+
+        #sorts by subject strength
+
+        c.execute("CREATE VIEW vw_subS1b AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
+        c.execute("CREATE VIEW vw_subS2b AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
+        
+        c.execute("CREATE VIEW vw_subS1g AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
+        c.execute("CREATE VIEW vw_subS2g AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
+
+        c.execute("CREATE VIEW vw_subS1n AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
+        c.execute("CREATE VIEW vw_subS2n AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
+        
+        #sorts by subject weakness
+
+        c.execute("CREATE VIEW vw_subWb AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subW = a.subW")
+        c.execute("CREATE VIEW vw_subWg AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subW = a.subW")
+        c.execute("CREATE VIEW vw_subWn AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subW = a.subW")
+        
+
+        ### generate the report
+
+        # https://www.w3resource.com/sqlite/sqlite-select-query-statement.php
         c.execute("CREATE TABLE reportb AS SELECT G.mentor_id,G.genderpref_id, SUM(countMatched) AS CountMatched FROM \
                     (SELECT mentor_id,genderpref_id,hobby1,countMatched FROM vw_hobby1b UNION \
                         SELECT mentor_id, genderpref_id, hobby2, countMatched FROM vw_hobby2b UNION \
@@ -219,79 +287,8 @@ class containerLayout(GridLayout):
 
         conn.commit()
         conn.close()
-        widget.disabled=True
 
-    def exit(self):
-        quit()
-        
-    def allSort(self, widget, generateWidget):
-        print("ok hello like please are you running")
-        """sorts by gender preference"""
-
-        # https://stackoverflow.com/questions/52767758/create-new-sqlite-table-combining-column-from-other-tables-with-sqlite3-and-pyth
-        # https://www.w3schools.com/sql/func_mysql_substr.asp
-        conn=sqlite3.connect(self.text)
-        c = conn.cursor()
-        c.execute("CREATE TABLE gend_pref_boy_info (mentor_id INTEGER, genderpref_id TEXT);")
-        c.execute("INSERT INTO gend_pref_boy_info(mentor_id) SELECT mentor.id FROM mentor WHERE mentor.gend='Male'")
-        c.execute("INSERT INTO gend_pref_boy_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='Male'")
-
-        c.execute("CREATE TABLE gend_pref_girl_info (mentor_id INTEGER, genderpref_id TEXT);")
-        c.execute("INSERT INTO gend_pref_girl_info(mentor_id) SELECT mentor.id FROM mentor WHERE mentor.gend='Female'")
-        c.execute("INSERT INTO gend_pref_girl_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='Female'")
-
-        c.execute("CREATE TABLE gend_pref_n_info (mentor_id INTEGER, genderpref_id TEXT);")
-        c.execute("INSERT INTO gend_pref_n_info(mentor_id) SELECT mentor.id FROM mentor")
-        c.execute("INSERT INTO gend_pref_n_info(genderpref_id) SELECT mentee.id FROM mentee WHERE mentee.gendpref='No Preference'") 
-
-        c.execute("CREATE VIEW vw_mentor_all AS SELECT id,fname,lname,gend,subW,hobby1,TRIM(SUBSTR(hobby2,pos1 + 1)) AS hobby2,TRIM(SUBSTR(hobby2,1,pos1 - 1)) AS hobby3,sport1,TRIM(SUBSTR(sport2,pos+1)) AS sport2,TRIM(SUBSTR(sport2,1,pos-1)) AS sport3,music1,TRIM(SUBSTR(music2,pos2+1)) AS music2,TRIM(SUBSTR(music2,1,pos2-1)) AS music3 ,eventpref1,TRIM(SUBSTR(eventpref2,pos3+1)) AS eventpref2,TRIM(SUBSTR(eventpref2,1,pos3-1)) AS eventpref3,subS1,TRIM(SUBSTR(subS2,pos4+1)) AS subS2 FROM (SELECT id,fname,lname,gend,subW,hobby1, hobby2, INSTR(hobby2, ', ') AS pos1, sport1, sport2, INSTR(sport2, ', ') AS pos, music1, music2, INSTR(music2, ', ') AS pos2, eventpref1, eventpref2, INSTR(eventpref2, ', ') AS pos3, subS1, subS2, INSTR(subS2, ', ') AS pos4 FROM (SELECT id,fname,lname,gend,subW,SUBSTR(hobby,1,pos1 - 1) AS hobby1, SUBSTR(hobby, pos1 + 1) AS hobby2,SUBSTR(sport,1,pos - 1) AS sport1, SUBSTR(sport,pos + 1) AS sport2, SUBSTR(music,1,pos2 - 1) AS music1, SUBSTR(music,pos2 + 1) AS music2, SUBSTR(eventpref,1,pos3 -1) AS eventpref1, SUBSTR(eventpref,pos3 + 1) AS eventpref2, SUBSTR(subS,1, pos4 - 1) AS subS1, SUBSTR(subS, pos4 + 1) AS subS2 FROM (SELECT *, id, fname,lname,gend,subW, INSTR(hobby, ', ') AS pos1, INSTR(sport, ', ') AS pos, INSTR(music, ', ') AS pos2, INSTR(eventpref, ', ') AS pos3, INSTR(subS, ', ') AS pos4 FROM mentor)))")
-        c.execute("CREATE VIEW vw_mentee_all AS SELECT id,fname,lname,subW,hobby1,TRIM(SUBSTR(hobby2,pos1 + 1)) AS hobby2,TRIM(SUBSTR(hobby2,1,pos1 - 1)) AS hobby3,sport1,TRIM(SUBSTR(sport2,pos+1)) AS sport2,TRIM(SUBSTR(sport2,1,pos-1)) AS sport3,music1,TRIM(SUBSTR(music2,pos2+1)) AS music2,TRIM(SUBSTR(music2,1,pos2-1)) AS music3 ,eventpref1,TRIM(SUBSTR(eventpref2,pos3+1)) AS eventpref2,TRIM(SUBSTR(eventpref2,1,pos3-1)) AS eventpref3,subS1,TRIM(SUBSTR(subS2,pos4+1)) AS subS2 FROM (SELECT id,fname,lname,subW,hobby1, hobby2, INSTR(hobby2, ', ') AS pos1, sport1, sport2, INSTR(sport2, ', ') AS pos, music1, music2, INSTR(music2, ', ') AS pos2, eventpref1, eventpref2, INSTR(eventpref2, ', ') AS pos3, subS1, subS2, INSTR(subS2, ', ') AS pos4 FROM (SELECT id,fname,lname,subW,SUBSTR(hobby,1,pos1 - 1) AS hobby1, SUBSTR(hobby, pos1 + 1) AS hobby2,SUBSTR(sport,1,pos - 1) AS sport1, SUBSTR(sport,pos + 1) AS sport2, SUBSTR(music,1,pos2 - 1) AS music1, SUBSTR(music,pos2 + 1) AS music2, SUBSTR(eventpref,1,pos3 -1) AS eventpref1, SUBSTR(eventpref,pos3 + 1) AS eventpref2, SUBSTR(subS,1, pos4 - 1) AS subS1, SUBSTR(subS, pos4 + 1) AS subS2 FROM (SELECT *, id, fname,lname,subW, INSTR(hobby, ', ') AS pos1, INSTR(sport, ', ') AS pos, INSTR(music, ', ') AS pos2, INSTR(eventpref, ', ') AS pos3, INSTR(subS, ', ') AS pos4 FROM mentee)))")
-
-        c.execute("CREATE VIEW gendpref_boy AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_boy_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
-        c.execute("CREATE VIEW mentor_boy AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_boy_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
-        
-        c.execute("CREATE VIEW gendpref_girl AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_girl_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
-        c.execute("CREATE VIEW mentor_girl AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_girl_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
-        
-        c.execute("CREATE VIEW gendpref_n AS SELECT genderpref_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentee_all AS t2 ON t1.genderpref_id=t2.id")
-        c.execute("CREATE VIEW mentor_n AS SELECT mentor_id,t2.hobby1,t2.hobby2,t2.hobby3,t2.sport1,t2.sport2,t2.sport3,t2.music1,t2.music2,t2.music3,t2.eventpref1,t2.eventpref2,t2.eventpref3,t2.subS1,t2.subS2,t2.subW FROM gend_pref_n_info AS t1 JOIN vw_mentor_all AS t2 ON t1.mentor_id=t2.id")
-
-        #sorts by hobbies
-
-        self.creatinTablesForTheButtons(c,"hobby",11)
-
-        #sorts by sports
-
-        self.creatinTablesForTheButtons(c,"sport",9)
-
-        #sorts by event preference
-
-        self.creatinTablesForTheButtons(c,"eventpref",3)
-
-        #sorts by music pref
-
-        self.creatinTablesForTheButtons(c,"music",7)
-
-        #sorts by subject strength
-
-        c.execute("CREATE VIEW vw_subS1b AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
-        c.execute("CREATE VIEW vw_subS2b AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
-        
-        c.execute("CREATE VIEW vw_subS1g AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
-        c.execute("CREATE VIEW vw_subS2g AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
-
-        c.execute("CREATE VIEW vw_subS1n AS SELECT mentor_id,b.genderpref_id,b.subS1, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS1 = a.subS1 OR b.subS1 = a.subS2")
-        c.execute("CREATE VIEW vw_subS2n AS SELECT mentor_id,b.genderpref_id,b.subS2, CASE WHEN b.subS1 ='' THEN 0 WHEN b.subS1 = 'Other' THEN 0 WHEN b.subS1 IS NOT null THEN 3 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subS2 = a.subS1 OR b.subS2 = a.subS2")
-        
-        #sorts by subject weakness
-
-        c.execute("CREATE VIEW vw_subWb AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_boy AS a LEFT OUTER JOIN gendpref_boy AS b ON b.subW = a.subW")
-        c.execute("CREATE VIEW vw_subWg AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_girl AS a LEFT OUTER JOIN gendpref_girl AS b ON b.subW = a.subW")
-        c.execute("CREATE VIEW vw_subWn AS SELECT mentor_id,b.genderpref_id,b.subW, CASE WHEN b.subW ='' THEN 0 WHEN b.subW = 'Other' THEN 0 WHEN b.subW IS NOT null THEN 4 ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.subW = a.subW")
-        conn.commit()
-        conn.close()
-        widget.disabled=True
-        generateWidget.disabled=False
+        generateWidget.disabled=True
 
 
 class mentorshipApp(App):
