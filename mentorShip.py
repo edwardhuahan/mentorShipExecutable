@@ -56,11 +56,6 @@ class containerLayout(GridLayout):
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", to_db)
         
     def create(self, loadButton, widget):
-
-        # Delete it at the start cause it won't delete at the end for some reason
-        if os.path.isfile('temp.db'):
-            os.remove('temp.db')
-
         #takes the the CSV filepaths and throws it to makeBaseTables
         self.text='temp.db'
         widget.disabled=False
@@ -94,8 +89,9 @@ class containerLayout(GridLayout):
         c.execute("CREATE VIEW vw_%s2n AS SELECT mentor_id,b.genderpref_id,b.%s2, CASE WHEN b.%s2 ='' THEN 0 WHEN b.%s2 = 'Other' THEN 0 WHEN b.%s2 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s2 = a.%s1 COLLATE NOCASE OR b.%s2 = a.%s2 COLLATE NOCASE OR b.%s2 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
         c.execute("CREATE VIEW vw_%s3n AS SELECT mentor_id,b.genderpref_id,b.%s3, CASE WHEN b.%s3 ='' THEN 0 WHEN b.%s3 = 'Other' THEN 0 WHEN b.%s3 IS NOT null THEN %d ELSE 0 END AS countMatched FROM mentor_n AS a LEFT OUTER JOIN gendpref_n AS b ON b.%s3 = a.%s1 COLLATE NOCASE OR b.%s3 = a.%s2 COLLATE NOCASE OR b.%s3 = a.%s3 COLLATE NOCASE"%(stringa,stringa,stringa,stringa,stringa,weighting,stringa,stringa,stringa,stringa,stringa,stringa))
 
-
     def exit(self):
+        if os.path.exists('temp.db'):
+            os.remove('temp.db')
         quit()
         
     def allSort(self,generateWidget):
