@@ -1,0 +1,141 @@
+# https://www.youtube.com/watch?v=j9PqNe3J_Cc&list=PLGLfVvz_LVvTAZ-OcNIXe05srJRXaJRd9&index=2
+# https://kivy.org/doc/stable/api-kivy.core.text.markup.html
+# https://kivy.org/doc/stable/api-kivy.uix.textinput.html
+<CustBotButton@Button>:
+    font_name: "Ostrich"
+    font_size: 45
+    color: 0,0,0,1
+    markup: True
+    background_normal: 'on-down-pink.png'
+    background_down: 'normal-color.png'
+    background_color: ''
+    disabled_color: 1,1,1,1
+    disabled: True
+
+<CustTopButton@Button>:
+    markup: True
+    font_name: "Ostrich"
+    bold: True
+    font_size: 50
+    color: 0,0,0,1
+    background_normal: 'normal-yellow.png'
+    background_down: 'orange.jpg'
+    disabled_color: 1,1,1,1
+
+<containerLayout>:
+    canvas.before:
+        Color:
+            rgba: .8,1,.8,1   
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'black.jpg'
+    id: sorter
+    rows: 2
+    text: ''
+
+    GridLayout:
+        cols:3
+        size_hint: 1,.7  
+        padding:5
+        spacing:5
+        GridLayout:
+            rows: 2
+            spacing:5
+            GridLayout:
+                rows: 2
+                CustTopButton:
+                    id: createButton
+                    text: 'Create'
+                    on_press: sorter.create(createButton,texter,OKButton)
+
+                BoxLayout:
+                    orientation:"horizontal"
+                    TextInput:
+                        id: texter
+                        text: ''
+                        font_size: 20
+                        focus: True
+                        hint_text: 'Name of new\ndatabase'
+                        disabled: True
+                        multiline: False
+                    CustTopButton:
+                        id: OKButton
+                        text:'OK'
+                        font_size: 40
+                        size_hint: 0.5,1
+                        disabled: True
+                        on_press: sorter.OkButton(OKButton,texter,loadButton,gendPref)
+
+            CustTopButton:
+                id: loadButton
+                text: '[b]  Load[/b] \n [size=35]no file loaded[/size]'
+                bold: False
+                on_press: sorter.loadDB(loadButton,createButton,gendPref,hobby,sports,eventPref,music,subS,subW)
+        
+        BoxLayout:
+            orientation: "vertical"
+            spacing:5
+            CustTopButton:
+                id: generateButton
+                disabled: True
+                text: 'Generate \n Pairings'
+                on_press: sorter.generateReport(self)
+            CustTopButton:
+                
+                text: 'Exit'
+                on_press: sorter.exit()
+        
+        FloatLayout:      
+            Label:
+                text: 'Mentorship \n     Pairing'
+                pos_hint: {'center_x': 0.55 ,'center_y':.7}
+                color: 1,1,1,1
+                font_size:60
+                bold: True
+                font_name: "Ostrich"
+    
+    GridLayout:
+        padding: 10
+        rows:2
+        spacing: 20
+        
+        BoxLayout:
+            spacing: 20
+
+            CustBotButton:
+                id: gendPref
+                text: 'Gender Pref.\n[size=30]        Stage 1[/size] \n[size=37]       Sort[/size]'
+                on_press: sorter.gendPrefSort(gendPref,hobby,sports,eventPref,music,subS,subW)
+            CustBotButton:
+                id: hobby
+                text: ' Hobbies\n[size=30]    Stage 2[/size] \n[size=37]    Sort[/size]'
+                on_press: sorter.hobbiesSort(self)
+
+            CustBotButton:
+                id:sports
+                text: ' Sports\n[size=30]    Stage 3[/size] \n[size=37]    Sort[/size]'
+                on_press: sorter.sportsSort(self)
+
+            CustBotButton:
+                id: eventPref
+                text: 'Event Pref.\n[size=30]       Stage 4[/size] \n[size=37]      Sort[/size]'
+                on_press: sorter.eventPrefSort(self)
+        
+        BoxLayout:
+            spacing: 20
+            
+            CustBotButton:
+                id: music
+                text: ' Music\n[size=30]  Stage 5[/size] \n[size=37]  Sort[/size]'
+                on_press: sorter.musicSort(self)
+
+            CustBotButton:
+                id: subS
+                text: ' Subject Str.\n[size=30]          Stage 6[/size] \n[size=37]        Sort[/size]'
+                on_press: sorter.subjStrSort(self)
+                
+            CustBotButton:
+                id: subW
+                text: ' Subject Weak.\n[size=30]           Stage 7[/size] \n[size=37]         Sort[/size]'
+                on_press: sorter.subjWeakSort(self,generateButton)
